@@ -4,7 +4,7 @@ import tifffile
 from segflow import OMETiffHelper, SegFlow
 from segflow.image_processing_methods import EntropyImageProcessingMethod
 
-def perform_binary_segmentation(ome_tiff, image_mpp, nuclear_channel, membrane_channel, entropy_threshold, output_mask):
+def perform_binary_segmentation(ome_tiff, image_mpp, nuclear_channel, membrane_channel, entropy_window_size_um, entropy_threshold, close_segmentation_um, erosion_expansion_um, output_mask):
     """
     Performs binary segmentation using entropy thresholding.
     
@@ -30,10 +30,10 @@ def perform_binary_segmentation(ome_tiff, image_mpp, nuclear_channel, membrane_c
     tiled_image = segmenter.extract_raw_tiles()
     print(tiled_image.shape)
 
-    entropy_window_size = int(round(14/image_mpp))
-    print(f"Entropy Window Size: {entropy_window_size}")    
+    entropy_window_size_px = int(round(entropy_window_size_um/image_mpp))
+    print(f"Entropy Window Size: {entropy_window_size_px}")    
 
-    eipm = EntropyImageProcessingMethod(image_mpp, entropy_window_size_px=int(round(14/image_mpp)), downscale_factor=1)
+    eipm = EntropyImageProcessingMethod(image_mpp, entropy_window_size_px=entropy_window_size_px, downscale_factor=1)
     entropy_tiles = eipm.run_image_processing(tiled_image)
     entropy_image = entropy_tiles.combine_tiles(crop=True,method="average")
 
@@ -42,11 +42,15 @@ def perform_binary_segmentation(ome_tiff, image_mpp, nuclear_channel, membrane_c
     print(f"Threshold: {entropy_threshold}")
 
     # erosion/expansion
-    erosion_expansion_px = int(round(11.2/image_mpp))
+    close_segmentation_px = int(round(close_segmentation_um/image_mpp))
+    erosion_expansion_px = int(round(erosion_expansion_um/image_mpp))
     print(f"Dilate/Erode: {erosion_expansion_px}")
-    binary_mask = entropy_image.apply_threshold(entropy_threshold).\
-        dilate_segmentation(erosion_expansion_px).\
-        erode_segmentation(erosion_expansion_px)
+    binary_mask = entropy_image.apply_threshold(entropy_threshold)
+    if close_segmentation_px > 0:
+        binary_mask = entropy_image.close_segmentation(close_segmentation_px)
+    if erosion_expansion_px > 0:
+        binary_mask = binary_mask.dilate_segmentation(erosion_expansion_px).\
+            erode_segmentation(erosion_expansion_px)
 
     # Save both masks to a TIFF file with custom descriptions
     with tifffile.TiffWriter(output_mask) as tif:

@@ -19,11 +19,14 @@ def inspect_image(ome_tiff):
 @click.argument('image_mpp', type=float)
 @click.argument('nuclear_channel', type=int)
 @click.option('--membrane_channel', type=int, default=None, help='Channel index for membrane stain')
+@click.option('--entropy_window_size_um', type=float, default=14, help='Size of window in which to calculate local entropy in um')
 @click.option('--entropy_threshold', type=float, default=None, help='Optional entropy threshold, if not provided it will be automatically determined')
+@click.option('--close_segmentation_um', type=float, default=30, help='Close segmentations with this window size in um')
+@click.option('--erosion_expansion_um', type=float, default=10, help='Smooth the filled-gaps with ersion then expansion using this window size in um')
 @click.argument('output_mask', type=click.Path(), required=True)
-def binary_segmentation(ome_tiff, image_mpp, nuclear_channel, membrane_channel, entropy_threshold, output_mask):
+def binary_segmentation(ome_tiff, image_mpp, nuclear_channel, membrane_channel, entropy_window_size_um, entropy_threshold, close_segmentation_um, erosion_expansion_um, output_mask):
     """Performs binary segmentation based on an entropy threshold."""
-    perform_binary_segmentation(ome_tiff, image_mpp, nuclear_channel, membrane_channel, entropy_threshold, output_mask)
+    perform_binary_segmentation(ome_tiff, image_mpp, nuclear_channel, membrane_channel, entropy_window_size_um, entropy_threshold, close_segmentation_um, erosion_expansion_um, output_mask)
 
 @main.command()
 @click.argument('ome_tiff', type=click.Path(exists=True))

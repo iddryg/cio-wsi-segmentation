@@ -5,9 +5,9 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "cio_wsi_segmentation"
 version = "0.1.0"
-description = "A command line tool to execute wsi segmentation"
+description = "A command line tool to execute WSI segmentation"
 readme = "README.md"
-license = {file = "LICENSE"}
+license = { file = "LICENSE" }
 requires-python = ">=3.8"
 authors = [
     { name="Jason L Weirather", email="jason.weirather@gmail.com" }
@@ -24,3 +24,8 @@ dependencies = [
 
 [project.scripts]
 cio-wsi-segmentation = "cio_wsi_segmentation.cli:main"
+
+# Setuptools configuration for package discovery
+[tool.setuptools]
+packages = ["cio_wsi_segmentation"]
+
