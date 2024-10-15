@@ -47,7 +47,7 @@ def perform_binary_segmentation(ome_tiff, image_mpp, nuclear_channel, membrane_c
     print(f"Dilate/Erode: {erosion_expansion_px}")
     binary_mask = entropy_image.apply_threshold(entropy_threshold)
     if close_segmentation_px > 0:
-        binary_mask = entropy_image.close_segmentation(close_segmentation_px)
+        binary_mask = binary_mask.close_segmentation(close_segmentation_px)
     if erosion_expansion_px > 0:
         binary_mask = binary_mask.dilate_segmentation(erosion_expansion_px).\
             erode_segmentation(erosion_expansion_px)
