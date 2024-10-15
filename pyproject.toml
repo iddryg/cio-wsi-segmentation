@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=61", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cio_wsi_segmentation"
+version = "0.1.0"
+description = "A command line tool to execute wsi segmentation"
+readme = "README.md"
+license = {file = "LICENSE"}
+requires-python = ">=3.8"
+authors = [
+    { name="Jason L Weirather", email="jason.weirather@gmail.com" }
+]
+dependencies = [
+    "tifffile",
+    "numpy",
+    "click",
+    "tomli"
+]
+
+[project.urls]
+"Homepage" = "https://github.com/jason-weirather/cio-wsi-segmentation"
+
+[project.scripts]
+cio-wsi-segmentation = "cio_wsi_segmentation.cli:main"
