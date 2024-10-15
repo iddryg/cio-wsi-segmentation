@@ -60,6 +60,8 @@ RUN micromamba run -n base git clone --branch v0.12.1z https://github.com/jason-
     cd /opt/deepcell-toolbox && micromamba run -n base pip install . && \
     cd /opt/deepcell-tf && micromamba run -n base pip install .
 
+RUN micromamba install -y -n base -c conda-forge opencv=4.10.0 py-opencv
+
 RUN micromamba run -n base git clone https://github.com/jason-weirather/seg-flow.git /opt/seg-flow && \
     cd /opt/seg-flow && micromamba run -n base pip install .
 
