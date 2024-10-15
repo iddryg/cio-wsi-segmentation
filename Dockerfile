@@ -71,11 +71,14 @@ USER root
 ADD . /opt/cio-wsi-segmentation
 
 # Create Models directories and extract the models into their respective folders
-RUN mkdir -p /Models/MultiplexSegmentation-7 /Models/MultiplexSegmentation-8 /Models/MultiplexSegmentation-9 && \
-    tar -xzf /opt/cio-wsi-segmentation/Models/MultiplexSegmentation-7.tar.gz -C /Models/MultiplexSegmentation-7 && \
-    tar -xzf /opt/cio-wsi-segmentation/Models/MultiplexSegmentation-8.tar.gz -C /Models/MultiplexSegmentation-8 && \
-    tar -xzf /opt/cio-wsi-segmentation/Models/MultiplexSegmentation-9.tar.gz -C /Models/MultiplexSegmentation-9 && \
-    chmod -R 755 /Models/MultiplexSegmentation-7 /Models/MultiplexSegmentation-8 /Models/MultiplexSegmentation-9
+RUN mkdir -p /Models/7 /Models/8 /Models/9 && \
+    tar -xzf /opt/cio-wsi-segmentation/Models/MultiplexSegmentation-7.tar.gz -C /Models/7 && \
+    rm /opt/cio-wsi-segmentation/Models/MultiplexSegmentation-7.tar.gz && \
+    tar -xzf /opt/cio-wsi-segmentation/Models/MultiplexSegmentation-8.tar.gz -C /Models/8 && \
+    rm /opt/cio-wsi-segmentation/Models/MultiplexSegmentation-8.tar.gz && \
+    tar -xzf /opt/cio-wsi-segmentation/Models/MultiplexSegmentation-9.tar.gz -C /Models/9 && \
+    rm /opt/cio-wsi-segmentation/Models/MultiplexSegmentation-9.tar.gz && \
+    chmod -R 755 /Models
 
 # Set permissions for the copied files
 RUN chmod -R 777 /opt/cio-wsi-segmentation

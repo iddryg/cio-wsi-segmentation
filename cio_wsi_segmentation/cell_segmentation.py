@@ -4,6 +4,8 @@ import tifffile
 from segflow import OMETiffHelper, SegFlow, SegmentationImage, SegmentationPatchTiledImage
 from segflow.image_processing_methods import EntropyImageProcessingMethod
 
+from tensorflow.keras.models import load_model
+
 def perform_cell_segmentation(ome_tiff, image_mpp, nuclear_channel, membrane_channel, model_path, binary_mask, output_segmentation_mask):
     """
     Performs binary segmentation using entropy thresholding.
@@ -41,7 +43,7 @@ def perform_cell_segmentation(ome_tiff, image_mpp, nuclear_channel, membrane_cha
     class MesmerSegmentationMethod(GenericSegmentationMethod):
         def __init__(self,image_mpp):
             super().__init__(image_mpp)
-            self.app = Mesmer()
+            self.app = Mesmer(model=load_model(model_path))
         def _run_segmentation(self,tiles, batch_size = batch_size):
             segmentation_tiles = []
             for i in range(0, len(tiles), batch_size):

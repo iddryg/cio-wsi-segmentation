@@ -16,7 +16,8 @@ dependencies = [
     "tifffile",
     "numpy",
     "click",
-    "tomli"
+    "tomli",
+    "tensorflow[and-cuda]"
 ]
 
 [project.urls]

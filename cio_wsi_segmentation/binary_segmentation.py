@@ -4,7 +4,7 @@ import tifffile
 from segflow import OMETiffHelper, SegFlow
 from segflow.image_processing_methods import EntropyImageProcessingMethod
 
-def perform_binary_segmentation(ome_tiff, image_mpp, nuclear_channel, membrane_channel, entropy_window_size_um, entropy_threshold, close_segmentation_um, erosion_expansion_um, output_mask):
+def perform_binary_segmentation(ome_tiff, image_mpp, nuclear_channel, membrane_channel, entropy_window_size_um, entropy_threshold, close_segmentation_um, erosion_expansion_um, save_entropy_mask, output_mask):
     """
     Performs binary segmentation using entropy thresholding.
     
@@ -49,8 +49,9 @@ def perform_binary_segmentation(ome_tiff, image_mpp, nuclear_channel, membrane_c
     if close_segmentation_px > 0:
         binary_mask = binary_mask.close_segmentation(close_segmentation_px)
     if erosion_expansion_px > 0:
-        binary_mask = binary_mask.dilate_segmentation(erosion_expansion_px).\
-            erode_segmentation(erosion_expansion_px)
+        binary_mask = binary_mask.\
+            erode_segmentation(erosion_expansion_px).\
+            dilate_segmentation(erosion_expansion_px)
 
     # Save both masks to a TIFF file with custom descriptions
     with tifffile.TiffWriter(output_mask) as tif:
@@ -58,7 +59,8 @@ def perform_binary_segmentation(ome_tiff, image_mpp, nuclear_channel, membrane_c
         binary_description = f"processed_image_mask (Threshold: {entropy_threshold})"
         tif.write(binary_mask, photometric='minisblack', compression='lzw', description=binary_description)
 
-        # Save entropy image as float32 with LZW compression and description
-        tif.write(entropy_image.astype(np.float32), photometric='minisblack', compression='lzw', description='entropy_mask')
+        if save_entropy_mask:
+            # Save entropy image as float16 with LZW compression and description
+            tif.write(entropy_image.astype(np.float16), photometric='minisblack', compression='lzw', description='entropy_mask')
 
     print(f"Binary and entropy masks saved to {output_mask}")
