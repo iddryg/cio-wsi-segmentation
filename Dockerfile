@@ -1,4 +1,4 @@
-FROM mambaorg/micromamba:1-jammy-cuda-12.6.0
+FROM mambaorg/micromamba:1-jammy-cuda-11.8.0
 
 # Set environment variables for NVIDIA
 ENV NVIDIA_VISIBLE_DEVICES all
@@ -30,13 +30,14 @@ RUN cp /usr/local/bin/_activate_current_env.sh /etc/profile.d/activate_mamba.sh 
 # Ensure it is sourced for all users by adding it to profile.d (global for bash users)
 RUN echo "source /etc/profile.d/activate_mamba.sh" >> /etc/bash.bashrc
 
-#USER mambauser
-#
-## Install PyTorch with CUDA using micromamba run (so we don’t need to activate the base environment manually)
-#RUN micromamba run -n base pip install \
-#    torch \
-#    torchvision \
-#    torchaudio --extra-index-url https://download.pytorch.org/whl/cu124
+# Create a writable directory for Matplotlib and Fontconfig cache
+RUN mkdir -p /tmp/matplotlib && \
+    mkdir -p /tmp/fontconfig && \
+    chmod -R 777 /tmp/matplotlib /tmp/fontconfig
+
+# Set environment variables for Matplotlib and Fontconfig
+ENV MPLCONFIGDIR=/tmp/matplotlib
+ENV XDG_CACHE_HOME=/tmp/fontconfig
 
 # Switch to root to perform privileged operations
 USER root
