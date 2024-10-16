@@ -1,5 +1,6 @@
 import numpy as np
 import tifffile
+from tqdm import tqdm
 
 from segflow import OMETiffHelper, SegFlow, SegmentationImage, SegmentationPatchTiledImage
 from segflow.image_processing_methods import EntropyImageProcessingMethod
@@ -35,7 +36,7 @@ def perform_cell_segmentation(ome_tiff, image_mpp, nuclear_channel, membrane_cha
 
 
     # Execute deepcell
-    batch_size = 64   # Number of tiles to process in each batch; adjust based on system memory
+    batch_size = 128   # Number of tiles to process in each batch; adjust based on system memory
 
     from deepcell.applications import Mesmer
 
@@ -46,11 +47,11 @@ def perform_cell_segmentation(ome_tiff, image_mpp, nuclear_channel, membrane_cha
             self.app = Mesmer(model=load_model(model_path))
         def _run_segmentation(self,tiles, batch_size = batch_size):
             segmentation_tiles = []
-            for i in range(0, len(tiles), batch_size):
+            for i in tqdm(range(0, len(tiles), batch_size),desc=f"Batches of ({batch_size})",total = (len(tiles) - 1) // batch_size + 1):
                 batch_tiles = tiles[i:i+batch_size]
                 preds = self.app.predict(batch_tiles, image_mpp=self.image_mpp)
                 segmentation_tiles.extend(preds)
-                print(f"     Processed batch {i // batch_size + 1}/{(len(tiles) - 1) // batch_size + 1}\r")
+                #print(f"     Processed batch {i // batch_size + 1}/{(len(tiles) - 1) // batch_size + 1}\r")
             segmentation_tiles = np.array(segmentation_tiles)
             return segmentation_tiles
 

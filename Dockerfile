@@ -1,34 +1,25 @@
-FROM mambaorg/micromamba:1-jammy-cuda-11.8.0
-
-# Set environment variables for NVIDIA
-ENV NVIDIA_VISIBLE_DEVICES all
-ENV NVIDIA_DRIVER_CAPABILITIES compute,utility
+# Use the TensorFlow GPU base image
+FROM tensorflow/tensorflow:2.8.0-gpu
 
 LABEL custom.license="Modified Apache License 2.0"
 LABEL custom.license.url="https://github.com/jason-weirather/cio-wsi-segmentation/LICENSE"
 
-# Copy the license file into the image
-COPY LICENSE /app/LICENSE
-
-# Install Python 3.8 in the base environment globally for all users
-RUN micromamba install -n base python=3.8 git nano -c conda-forge && \
-    micromamba clean --all --yes
-
-USER root
+# System maintenance
+RUN rm /etc/apt/sources.list.d/cuda.list && \
+    rm /etc/apt/sources.list.d/nvidia-ml.list
 
 RUN apt-get update && apt-get install -y \
     build-essential \
     gcc \
     g++ \
+    git \
     make \
-    libpython3-dev
-
-# Add your _activate_current_env.sh to the global profile.d directory
-RUN cp /usr/local/bin/_activate_current_env.sh /etc/profile.d/activate_mamba.sh && \
-    chmod +x /etc/profile.d/activate_mamba.sh
-
-# Ensure it is sourced for all users by adding it to profile.d (global for bash users)
-RUN echo "source /etc/profile.d/activate_mamba.sh" >> /etc/bash.bashrc
+    libpython3-dev \
+    libgl1-mesa-glx \
+    libglib2.0-0 \
+    graphviz \
+    nano \
+    && rm -rf /var/lib/apt/lists/*
 
 # Create a writable directory for Matplotlib and Fontconfig cache
 RUN mkdir -p /tmp/matplotlib && \
@@ -39,37 +30,26 @@ RUN mkdir -p /tmp/matplotlib && \
 ENV MPLCONFIGDIR=/tmp/matplotlib
 ENV XDG_CACHE_HOME=/tmp/fontconfig
 
-# Switch to root to perform privileged operations
-USER root
+# Ensure pip installs globally for all users
+RUN pip install --upgrade pip
 
-# Create deepcell directories and open permissions
-RUN mkdir -p /opt/deepcell-toolbox && \
-    chmod -R 777 /opt/deepcell-toolbox && \
-    mkdir -p /opt/deepcell-tf && \
-    chmod -R 777 /opt/deepcell-tf
+# Clone and install the deepcell-toolbox and deepcell-tf requirements
+WORKDIR /opt
 
-# Create seg-flow directory and give permissions
-RUN mkdir -p /opt/seg-flow && \
-    chmod -R 777 /opt/seg-flow
+RUN git clone --branch v0.12.1z https://github.com/jason-weirather/deepcell-toolbox.git /opt/deepcell-toolbox && \
+    git clone --branch v0.12.6z https://github.com/jason-weirather/deepcell-tf.git /opt/deepcell-tf && \
+    cd /opt/deepcell-toolbox && pip install --no-cache-dir --prefix=/usr/local . && \
+    cd /opt/deepcell-tf && pip install --no-cache-dir --prefix=/usr/local .
 
-# Switch back to the default user for micromamba
-USER mambauser
+# Clone and install seg-flow
+RUN git clone https://github.com/jason-weirather/seg-flow.git /opt/seg-flow && \
+    cd /opt/seg-flow && pip install --no-cache-dir --prefix=/usr/local .
 
-# Clone and install the deepcell requirements
-RUN micromamba run -n base git clone --branch v0.12.1z https://github.com/jason-weirather/deepcell-toolbox.git /opt/deepcell-toolbox && \
-    micromamba run -n base git clone --branch v0.12.6z https://github.com/jason-weirather/deepcell-tf.git /opt/deepcell-tf && \
-    cd /opt/deepcell-toolbox && micromamba run -n base pip install . && \
-    cd /opt/deepcell-tf && micromamba run -n base pip install .
-
-RUN micromamba install -y -n base -c conda-forge opencv=4.10.0 py-opencv
-
-RUN micromamba run -n base git clone https://github.com/jason-weirather/seg-flow.git /opt/seg-flow && \
-    cd /opt/seg-flow && micromamba run -n base pip install .
-
-USER root
-
-# Copy the entire repository into the container
+# Copy your project files
 ADD . /opt/cio-wsi-segmentation
+
+# Install the cio-wsi-segmentation package globally
+RUN cd /opt/cio-wsi-segmentation && pip install --no-cache-dir --prefix=/usr/local .
 
 # Create Models directories and extract the models into their respective folders
 RUN mkdir -p /Models/7 /Models/8 /Models/9 && \
@@ -84,15 +64,8 @@ RUN mkdir -p /Models/7 /Models/8 /Models/9 && \
 # Set permissions for the copied files
 RUN chmod -R 777 /opt/cio-wsi-segmentation
 
-# Set perms so mamba will run for all users
-RUN mkdir -p /.cache/mamba/proc && \
-    chmod -R 777 /.cache/mamba
+# Ensure that all installed Python programs are available to all users
+ENV PATH="/usr/local/bin:${PATH}"
 
-USER mambauser
-RUN cd /opt/cio-wsi-segmentation && micromamba run -n base pip install -e .
 
-RUN mkdir -p /home/mambauser && \
-    chmod -R 777 /home/mambauser
-
-# Use the wrapper script as the entrypoint
-ENTRYPOINT ["/opt/cio-wsi-segmentation/start.sh"]
+ENTRYPOINT ["cio-wsi-segmentation"]
