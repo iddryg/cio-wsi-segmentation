@@ -2,7 +2,7 @@
 FROM tensorflow/tensorflow:2.8.0-gpu
 
 LABEL custom.license="Modified Apache License 2.0"
-LABEL custom.license.url="https://github.com/jason-weirather/cio-wsi-segmentation/LICENSE"
+LABEL custom.license.url="https://github.com/iddryg/cio-wsi-segmentation/LICENSE"
 
 # System maintenance
 RUN rm /etc/apt/sources.list.d/cuda.list && \
@@ -40,9 +40,16 @@ RUN git clone --branch v0.12.1z https://github.com/jason-weirather/deepcell-tool
     git clone --branch v0.12.6z https://github.com/jason-weirather/deepcell-tf.git /opt/deepcell-tf && \
     cd /opt/deepcell-toolbox && pip install --no-cache-dir --prefix=/usr/local . && \
     cd /opt/deepcell-tf && pip install --no-cache-dir --prefix=/usr/local .
+# keep jason's for now... but here's mine in case
+#RUN git clone --branch v0.12.1z https://github.com/iddryg/deepcell-toolbox.git /opt/deepcell-toolbox && \
+#    git clone --branch v0.12.6z https://github.com/iddryg/deepcell-tf.git /opt/deepcell-tf && \
+#    cd /opt/deepcell-toolbox && pip install --no-cache-dir --prefix=/usr/local . && \
+#    cd /opt/deepcell-tf && pip install --no-cache-dir --prefix=/usr/local .
 
 # Clone and install seg-flow
-RUN git clone https://github.com/jason-weirather/seg-flow.git /opt/seg-flow && \
+#RUN git clone https://github.com/jason-weirather/seg-flow.git /opt/seg-flow && \
+#    cd /opt/seg-flow && pip install --no-cache-dir --prefix=/usr/local .
+RUN git clone https://github.com/iddryg/seg-flow.git /opt/seg-flow && \
     cd /opt/seg-flow && pip install --no-cache-dir --prefix=/usr/local .
 
 # Copy your project files
