@@ -20,7 +20,8 @@ def perform_cell_segmentation(ome_tiff, image_mpp, nuclear_channel, membrane_cha
         binary_mask (str): Optional path to the binary mask.
         output_segmentation_mask (str): Path to save the segmentation mask as a TIFF file.
     """
-    segmenter = SegFlow(tile_size=512, stride=256)
+    #segmenter = SegFlow(tile_size=512, stride=256)
+    segmenter = SegFlow(tile_size=(512,512), stride=(256,256))
 
     # Load the OME-TIFF
     with OMETiffHelper(ome_tiff) as ome:
