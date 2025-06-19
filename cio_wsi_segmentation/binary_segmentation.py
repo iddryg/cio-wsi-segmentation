@@ -16,7 +16,8 @@ def perform_binary_segmentation(ome_tiff, image_mpp, nuclear_channel, membrane_c
         entropy_threshold (float): Optional entropy threshold value.
         output_mask (str): Path to save the binary mask and entropy mask as a TIFF file.
     """
-    segmenter = SegFlow(tile_size=512, stride=256)
+    #segmenter = SegFlow(tile_size=512, stride=256)
+    segmenter = SegFlow(tile_size=(512,512), stride=(256,256))
 
     # Load the OME-TIFF
     with OMETiffHelper(ome_tiff) as ome:
